@@ -44,4 +44,6 @@ int count(std::vector<int> &vec, int target_money)
         int remaining_money = target_money - money;
         money_array[ money ] = money_array[ money ]  /*without the current denomination*/ + money_array[ remaining_money ];  /* with current denomination*/
       }
+  }
+  return money_array[target_sum];
 }
