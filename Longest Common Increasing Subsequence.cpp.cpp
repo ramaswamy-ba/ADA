@@ -2,6 +2,32 @@
 #include <iostream>
 using namespace std;
 
+int longestIncreasingSubsequence(vector<int>& nums)
+{
+    int n = nums.size();
+    vector<int> dp(n, 1);
+    int max_len = 1;
+
+    for(int i = 1; i < n; i++) 
+    {
+        for(int j = 0; j < i; j++) 
+        {
+            if(nums[i] > nums[j]) 
+                dp[i] = max(dp[i], dp[j] + 1);
+        }
+        max_len = max(max_len, dp[i]);
+    }
+
+    return max_len;
+}
+
+int test1() 
+{
+    vector<int> nums = {10, 22, 9, 33, 21, 50, 41, 60, 80};
+    cout << "Length of Longest Increasing Subsequence is " << longestIncreasingSubsequence(nums) << endl;
+    return 0;
+}
+
 vector<int> LCIS(vector<int>& arr1, vector<int>& arr2)
 {
     int n = arr1.size(), m = arr2.size();
