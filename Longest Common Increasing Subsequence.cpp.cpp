@@ -28,6 +28,24 @@ int test1()
     return 0;
 }
 
+int myLCIS(vector<int>& arr1, vector<int>& arr2)
+{
+    int n = arr1.size(), m = arr2.size();
+    vector<int> table(m, 0);
+    for(int i=0; i<n; ++i)
+    {
+        int  cur_max = 0;
+        for(int j=0; j<m; ++j)
+        {
+            if ( arr1[i] == arr2[j])
+                table[j] = std::max( table[j], cur_max+1);
+            else if ( arr1[i] > arr2[j] )
+                cur_max = std::max(cur_max, table[j]
+        }
+    }
+    return *(std::max_element(table.begin(), table.end()));
+}
+
 vector<int> LCIS(vector<int>& arr1, vector<int>& arr2)
 {
     int n = arr1.size(), m = arr2.size();
