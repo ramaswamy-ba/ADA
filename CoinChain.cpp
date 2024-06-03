@@ -40,7 +40,7 @@ int count(std::vector<int> &vec, int target_money)
   for(auto coin: coins)
   {
       for(int money = coin; money <= target_money; ++money)
-        all_targets[ money ] = all_targets[ money ]  + all_targets[ money-coin ]; 
+        all_targets[ money ] = all_targets[ money ] /* with-out using */  + all_targets[ money - coin ]; /* with using coin */ 
   }
   return all_targets[target_money];
 }
