@@ -35,15 +35,12 @@ int count(std::vector<int> &coins, int index, int target_money)
 /* Time complexity: O(coins * target_money) */
 int count(std::vector<int> &vec, int target_money)
 {
-  std::vector<int> money_array(target_money+1, 0);
-  money_array[0]=1; 
+  std::vector<int> all_targets(target_money+1, 0);
+  all_targets[0]=1; 
   for(auto coin: coins)
   {
       for(int money = coin; money <= target_money; ++money)
-      {
-        int remaining_money = target_money - money;
-        money_array[ money ] = money_array[ money ]  /*without the current denomination*/ + money_array[ remaining_money ];  /* with current denomination*/
-      }
+        all_targets[ money ] = all_targets[ money ]  + all_targets[ money-coin ]; 
   }
-  return money_array[target_sum];
+  return all_targets[target_money];
 }
