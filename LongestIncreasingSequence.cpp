@@ -43,6 +43,27 @@ int lis_recursive2(const std::vector<int> &nums, size_t cur_pos, size_t prev_pos
     //std::cout<<"Incl "<<inclusive<<" Excl "<<exclusive<<' '<<cur_pos<<' '<<nums[cur_pos]<< ' '<<prev_pos<<' '<<nums[prev_pos]<<'\n';
     return std::max(inclusive, exclusive);
 }
+// with memorization
+int lis_recursive2_memo(const std::vector<int> &nums, size_t cur_pos, size_t prev_pos)
+{
+    static std::vector<std::vector<int>> memo(nums.size(), std::vector<int>(nums.size(), -1));
+    if (cur_pos == 0 ) 
+    {
+        if ( nums[cur_pos] < nums[prev_pos] ) // case of handling in case of only two numbers, or scenario like this
+            return 2; // current and prev numbers are the part of the seq
+        return 1;     // only the current number is part of the seq
+    }
+    if(memo[cur_pos][prev_pos] != -1)
+        return memo[cur_pos][prev_pos];
+
+    int inclusive=0, exclusive=0;
+    
+    if(nums[cur_pos] < nums[prev_pos])
+        inclusive = 1 + lis_recursive2_memo(nums, cur_pos-1, cur_pos);
+    exclusive  = lis_recursive2_memo(nums, cur_pos-1, prev_pos);
+
+   return  memo[cur_pos][prev_pos] = std::max(inclusive, exclusive);
+}
 
 int lis_dp(const std::vector<int> &nums)
 {
@@ -58,7 +79,6 @@ int lis_dp(const std::vector<int> &nums)
     return dp[nums.size()-1];
 }
 //using sequence remembering
-
 int lis_seq(const std::vector<int> &nums)
 {
     std::vector<int> seq;
@@ -79,13 +99,15 @@ int lis_seq(const std::vector<int> &nums)
 int main()
 {
     std::vector<int> nums = {10, 22, 9, 33, 21, 50, 41, 60, 80};
-    nums = {-1,2,-3,-1,-2,9};
+    //nums = {-1,2,-3,-1,-2,9};
     auto res1 = lis_recursive1(nums, nums.size());
     auto res2 = lis_recursive2(nums, nums.size()-2,nums.size()-1);
+    auto res2_memo = lis_recursive2_memo(nums, nums.size()-2,nums.size()-1);
     auto res3 = lis_dp(nums);
     auto res4 = lis_seq(nums);
     std::cout<<"Result1 = "<<res1<<'\n';
     std::cout<<"Result2 = "<<res2<<'\n';
+    std::cout<<"ResMemo = "<<res2_memo<<'\n';
     std::cout<<"Result3 = "<<res3<<'\n';
     std::cout<<"Result4 = "<<res4<<'\n';
     return 0;
