@@ -21,8 +21,8 @@ int lis_recursive1(std::vector<int>& nums, size_t n, int prev = INT_MAX)
 }
 
 //taking previous_num pos as argument
-//still getting the wrong result
-int lis_recursive2(const std::vector<int> &nums, size_t cur_pos, size_t prev_pos)
+//still getting the wrong result, this function does not work for the data {10, 22, 9, 33, 21, 50, 41, 60, 30};
+/*int lis_recursive2(const std::vector<int> &nums, size_t cur_pos, size_t prev_pos)
 {
     if (cur_pos == 0 ) 
     {
@@ -39,10 +39,26 @@ int lis_recursive2(const std::vector<int> &nums, size_t cur_pos, size_t prev_pos
         //std::cout<<"Incl "<<inclusive<<' '<<cur_pos<<' '<<nums[cur_pos]<< ' '<<prev_pos<<' '<<nums[prev_pos]<<'\n';
     }
 
-    exclusive = lis_recursive2(nums, cur_pos-1, prev_pos);
-    //std::cout<<"Incl "<<inclusive<<" Excl "<<exclusive<<' '<<cur_pos<<' '<<nums[cur_pos]<< ' '<<prev_pos<<' '<<nums[prev_pos]<<'\n';
+    exclusive = std::max(lis_recursive2(nums, cur_pos-1, prev_pos), lis_recursive2(nums, cur_pos-1, cur_pos));
+    std::cout<<"Incl "<<inclusive<<" Excl "<<exclusive<<' '<<cur_pos<<' '<<nums[cur_pos]<< ' '<<prev_pos<<' '<<nums[prev_pos]<<'\n';
     return std::max(inclusive, exclusive);
+}*/
+
+int lis_recursive2(const std::vector<int> &nums, size_t cur_pos, size_t prev_pos)
+{
+    if (cur_pos == 0 ) 
+    {
+        if ( nums[cur_pos] < nums[prev_pos] ) // case of handling in case of only two numbers, or scenario like this
+            return 2; // current and prev numbers are the part of the seq
+        return 1;     // only the current number is part of the seq
+    }
+
+    int added = nums[cur_pos] < nums[prev_pos]; // added or not addedd
+
+    //tree should continue to process, irrespective of added or not to take
+    return std::max(lis_recursive2(nums, cur_pos-1, prev_pos), lis_recursive2(nums, cur_pos-1, cur_pos) + added );
 }
+
 // with memorization
 int lis_recursive2_memo(const std::vector<int> &nums, size_t cur_pos, size_t prev_pos)
 {
@@ -56,13 +72,8 @@ int lis_recursive2_memo(const std::vector<int> &nums, size_t cur_pos, size_t pre
     if(memo[cur_pos][prev_pos] != -1)
         return memo[cur_pos][prev_pos];
 
-    int inclusive=0, exclusive=0;
-    
-    if(nums[cur_pos] < nums[prev_pos])
-        inclusive = 1 + lis_recursive2_memo(nums, cur_pos-1, cur_pos);
-    exclusive  = lis_recursive2_memo(nums, cur_pos-1, prev_pos);
-
-   return  memo[cur_pos][prev_pos] = std::max(inclusive, exclusive);
+    int added = nums[cur_pos] < nums[prev_pos]; // added or not added
+    return  memo[cur_pos][prev_pos] = std::max(lis_recursive2_memo(nums, cur_pos-1, prev_pos), lis_recursive2_memo(nums, cur_pos-1, cur_pos) + added);
 }
 
 int lis_dp(const std::vector<int> &nums)
