@@ -33,46 +33,49 @@ void subArraySlidingWindow(const std::vector<int>& vec, int target)
     }
 }
 
-  std::vector<std::vector<int>> target_path;                                                                                                
-  void list_targets(std::vector<int> &nums, int target)                                                                                     
-  {                                                                                                                                         
-      if ( nums.empty())                                                                                                                    
-          return;                                                                                                                           
-      int sum = nums[0];                                                                                                                    
-      for(size_t w_begin =0, w_end=1; w_end <nums.size(); )                                                                                 
-      {                                                                                                                                     
-          if( sum == target)                                                                                                                
-          {                                                                                                                                 
-              target_path.push_back(std::vector<int>(nums.begin()+w_begin, nums.begin()+w_end));                                            
-              sum  = sum - nums[w_begin];                                                                                                   
-              ++w_begin;                                                                                                                    
-          }                                                                                                                                 
-          else if ( sum > target)                                                                                                           
-          {                                                                                                                                 
-              sum  = sum - nums[w_begin];                                                                                                   
-              ++w_begin;                                                                                                                    
-          }                                                                                                                                 
-          else                                                                                                                              
-          {                                                                                                                                 
-                                                                                                                                            
-              if( w_end < nums.size())                                                                                                      
-                  sum  = sum + nums[w_end];                                                                                                 
-              ++w_end;                                                                                                                      
-          }                                                                                                                                 
-      }                                                                                                                                     
-      std::cout<<"Target Path size "<<target_path.size()<<'\n';                                                                             
-      size_t min_length = INT_MAX;    
-      for(auto v: target_path)    
-      {    
-          min_length = std::min(v.size(), min_length);    
-          for(auto p: v)    
-          {                                                                                                                                                                                                                                                                              
-              std::cout<<p<<',';    
-          }    
-          std::cout<<'\n';    
-      }    
-      std::cout<<"Target exist with min length "<<min_length<<'\n';    
-  }
+std::vector<std::vector<int>> target_path;
+void list_targets(std::vector<int> &nums, int target)
+{
+    if ( nums.empty())
+        return;
+    int sum = nums[0];
+    for(size_t w_begin =0, w_end=1; w_end <nums.size(); )
+    {   
+        if( sum == target)
+        {   
+            target_path.push_back(std::vector<int>(nums.begin()+w_begin, nums.begin()+w_end));
+            sum  = sum - nums[w_begin];
+            ++w_begin;
+        }   
+        else if ( sum > target)
+        {   
+            sum  = sum - nums[w_begin];
+            ++w_begin;
+        }   
+        else
+        {   
+
+            if( w_end < nums.size())
+                sum  = sum + nums[w_end];
+            ++w_end;
+        }   
+    }   
+    std::cout<<"Target Path size "<<target_path.size()<<'\n';
+    size_t min_length = INT_MAX;
+    size_t max_length = 0;
+    for(auto v: target_path)
+    {   
+        min_length = std::min(v.size(), min_length);
+        max_length = std::max(v.size(), max_length);
+        for(auto p: v)
+        {   
+            std::cout<<p<<',';
+        }   
+        std::cout<<" -> "<<v.size()<<'\n';
+    }   
+    std::cout<<"Target exist with min length "<<min_length<<'\n';
+    std::cout<<"Target exist with max length "<<max_length<<'\n';
+}
 
 void TestsubArray()
 {
@@ -89,6 +92,6 @@ void TestsubArray()
 int main()
 {
 	std::cout << "Test\n";
-    TestsubArray();
+        TestsubArray();
 	return 0;
 }
