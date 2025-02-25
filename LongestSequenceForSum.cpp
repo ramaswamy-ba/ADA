@@ -13,7 +13,7 @@ int maxLen(int arr[], int n, int target)
         sum += arr[i];
         
         if (sum == target)
-            ++len; 
+            len = i + 1; 
 
         if (presum.find(sum) != presum.end()) 
             len = max(len, i - presum[sum]);
