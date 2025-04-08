@@ -76,6 +76,24 @@ void list_targets(std::vector<int> &nums, int target)
     std::cout<<"Target exist with min length "<<min_length<<'\n';
     std::cout<<"Target exist with max length "<<max_length<<'\n';
 }
+// Optimized algorithm
+int subarraySum(std::vector<int>& nums, int target)
+{
+    int count = 0, currentSum = 0;
+    std::unordered_map<int, int> prefixSums;
+    prefixSums[0] = 1; // Add initial prefix sum with frequency 1
+    for (int num : nums)
+    {
+        currentSum += num;
+        // Check if there's a subarray ending at current index with sum target
+        if (prefixSums.count(currentSum - target) )
+            count += prefixSums[currentSum - target];
+
+        prefixSums[currentSum]++; // Update the frequency of the current prefix sum
+        print(prefixSums);
+    }
+    return count;
+}
 
 void TestsubArray()
 {
