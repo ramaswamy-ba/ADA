@@ -31,4 +31,37 @@ int main()
     std::cout << "Smallest missing positive: " << firstMissingPositive(arr) << "\n";  // Output: 2
 }
 
-//2.
+//2. Use of undeclared identifier 'reversseHalf'; did you mean 'reversedHalf'? (fix available)
+#include <iostream>
+#include <string>
+#include <unordered_map>
+
+std::string longestPalindromicRearrangement(const std::string& s)
+{
+    std::unordered_map<char, int> freq;
+    for (char c : s)
+        freq[c]++;
+
+    std::string half = "";
+    std::string mid="";
+
+    for (auto& [ch, count] : freq)
+    {
+        // Add half of the characters to the half string
+        half += std::string(count / 2, ch);
+        // If there's an odd count, save one possible center character
+        if (count % 2 != 0 && mid.empty() )
+            mid = ch;
+        std::cout<<half<<'\n';
+    }
+
+    std::string reversedHalf(half.rbegin(), half.rend());
+
+    return half + mid + reversedHalf;
+
+}
+int main()
+{
+    std::string input = "ABCDEABD";
+    std::cout << longestPalindromicRearrangement(input) << "\n";  // Output: "DBAEABD" or "DBACABD"
+}
