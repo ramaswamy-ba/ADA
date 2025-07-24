@@ -143,53 +143,6 @@ void TestbestSum()
 
 }
 
-int maxProfit(const std::vector<int>& vec, int pos, bool canBuy, int op_count)
-{
-    if (pos >= vec.size() || op_count == 0 )
-        return 0;
-    
-    int without  = maxProfit(vec, pos + 1, canBuy, op_count);
-    int with = 0;
-    if (canBuy)
-        with = -vec[pos] + maxProfit(vec, pos + 1, false, op_count - 1);
-    else
-        with = vec[pos]  + maxProfit(vec, pos + 1, true, op_count - 1);
-
-    // with = maxProfit(vec, pos + 1, !canBuy, op_count - 1) + (vec[pos] * canBuy ? -1 : 1);
-
-    return std::max(without, with);
-}
-
-int maxProfitMemo(const std::vector<int>& vec, int pos, bool canBuy, int op_count)
-{
-    static std::vector<std::vector<int>> memo(op_count + 1, std::vector<int>(vec.size(), -1));
-    if (pos >= vec.size() || op_count == 0)
-        return 0;
-    if (memo[op_count][pos] != -1)
-    {
-        std::cout << "Result from memo for " << pos << "th day " << op_count << ' ' << memo[op_count][pos] << endl;
-        return memo[op_count][pos];
-    }
-
-    int without  = maxProfit(vec, pos + 1, canBuy, op_count);
-    int with = 0;
-    if (canBuy)
-        with = -vec[pos] + maxProfit(vec, pos + 1, false, op_count - 1);
-    else
-        with = vec[pos]  + maxProfit(vec, pos + 1, true, op_count - 1);
-
-    memo[op_count][pos] = std::max(without, with);
-    return memo[op_count][pos];
-}
-
-void TestmaxProfit()
-{
-    std::vector<int> vec{ 3,2,6,5,0,3 };
-    //std::vector<int> vec{ 2,3,5 };
-
-    std::cout << "Max Profit " << maxProfit(vec, 0, true, 4) << endl;
-    std::cout << "Max Profit " << maxProfitMemo(vec, 0, true, 4) << endl;
-}
 /*
 Fill at 13 10
 Fill at 17 13
