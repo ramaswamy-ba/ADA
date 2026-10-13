@@ -85,3 +85,104 @@ public:
         }
     }
 };
+
+High Performance 
+#include <iostream>
+#include <cstdint>
+#include <array>
+#include <atomic>
+#include <vector>
+
+constexpr size_t CACHE_LINE_SIZE = 64;
+constexpr size_t BOOK_DEPTH = 10; // e.g., Top 10 levels of bids and asks
+
+struct Level {
+    double price;
+    uint64_t volume;
+};
+
+// Represents a consolidated view of the order book
+struct alignas(CACHE_LINE_SIZE) OrderBook {
+    std::array<Level, BOOK_DEPTH> bids;
+    std::array<Level, BOOK_DEPTH> asks;
+    uint64_t timestamp;
+};
+
+// A shared slot that routes pointers between threads
+struct alignas(CACHE_LINE_SIZE) BookSlot {
+    // Points to the absolute latest stable order book
+    std::atomic<OrderBook*> latest_book{nullptr};
+};
+
+template <size_t MaxTickers>
+class ConsolidatedMarketDataSystem {
+private:
+    alignas(CACHE_LINE_SIZE) std::array<BookSlot, MaxTickers> cache;
+    alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> dirty_mask{0};
+
+    // Producer's private scratch buffers to modify before swapping
+    std::array<OrderBook*, MaxTickers> producer_buffers;
+
+public:
+    ConsolidatedMarketDataSystem() {
+        for (size_t i = 0; i < MaxTickers; ++i) {
+            // Pre-allocate buffers to eliminate runtime heap allocations
+            cache[i].latest_book.store(new OrderBook(), std::memory_order_relaxed);
+            producer_buffers[i] = new OrderBook();
+        }
+    }
+
+    ~ConsolidatedMarketDataSystem() {
+        for (size_t i = 0; i < MaxTickers; ++i) {
+            delete producer_buffers[i];
+            delete cache[i].latest_book.load();
+        }
+    }
+
+    // ========================================================================
+    // FAST PRODUCER: Modifies its private buffer and swaps it in
+    // ========================================================================
+    inline void update_order_book(size_t ticker_id, const OrderBook& incoming_update) {
+        if (ticker_id >= MaxTickers) [[unlikely]] return;
+
+        // 1. Update the producer's private working buffer in isolation
+        OrderBook* working_buffer = producer_buffers[ticker_id];
+        *working_buffer = incoming_update; // In-place copy/consolidation logic
+
+        // 2. Atomically publish the working buffer to the shared cache.
+        // exchange() returns the old buffer that the consumer left behind.
+        OrderBook* old_buffer = cache[ticker_id].latest_book.exchange(
+            working_buffer, std::memory_order_acq_rel
+        );
+
+        // 3. Keep the old buffer as our next private scratchpad
+        producer_buffers[ticker_id] = old_buffer;
+
+        // 4. Mark this ticker as updated
+        dirty_mask.fetch_or(1ULL << ticker_id, std::memory_order_release);
+    }
+
+    // ========================================================================
+    // SLOW CONSUMER: Safely grabs the latest book without copying it mid-flight
+    // ========================================================================
+    template <typename Func>
+    inline void fetch_latest_books(Func&& process_order_book) {
+        uint64_t mask = dirty_mask.exchange(0, std::memory_order_acquire);
+
+        while (mask > 0) {
+            int ticker_id = __builtin_ctzll(mask);
+            
+            // Read the current atomic pointer cleanly. 
+            // The producer might update the slot later, but this specific pointer 
+            // is guaranteed to contain a fully stable, completed order book.
+            OrderBook* consumer_view = cache[ticker_id].latest_book.load(std::memory_order_acquire);
+
+            // Execute processing logic directly on the pointer (Zero-Copy)
+            process_order_book(ticker_id, *consumer_view);
+
+            mask &= (mask - 1);
+        }
+    }
+};
+
+
